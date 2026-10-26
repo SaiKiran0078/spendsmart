@@ -1,5 +1,9 @@
 <div align="center">
 
+<img src="assets/banner.svg" alt="SpendSmart — Track Every Rupee. Spend Smarter." width="100%">
+
+</div>
+
 # 💸 SpendSmart
 
 ### Track Every Rupee. Spend Smarter.

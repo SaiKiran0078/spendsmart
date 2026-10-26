@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="340" viewBox="0 0 1200 340" role="img" aria-labelledby="title desc">
+  <title id="title">SpendSmart</title>
+  <desc id="desc">Track every rupee. Spend smarter. A personal expense tracker.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1220"/><stop offset="100%" stop-color="#16243b"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#34d399"/><stop offset="100%" stop-color="#22d3ee"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="340" rx="28" fill="url(#bg)"/>
+  <circle cx="1040" cy="60" r="150" fill="#34d399" opacity=".08"/>
+  <circle cx="1120" cy="280" r="190" fill="#22d3ee" opacity=".06"/>
+  <g transform="translate(78 80)">
+    <rect width="92" height="92" rx="24" fill="url(#accent)"/>
+    <path d="M25 28h42v10H25zm0 18h42v10H25zm0 18h28v10H25z" fill="#071321"/>
+    <circle cx="69" cy="69" r="18" fill="#0b1220" stroke="#fff" stroke-width="3"/>
+    <path d="M61 69l6 6 11-13" fill="none" stroke="#34d399" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="200" y="126" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="58" font-weight="800" fill="#f8fafc">Spend<tspan fill="#34d399">Smart</tspan></text>
+  <text x="202" y="174" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="26" font-weight="500" fill="#cbd5e1">Track every rupee. Spend smarter.</text>
+  <rect x="202" y="208" width="360" height="3" rx="2" fill="url(#accent)"/>
+  <text x="202" y="250" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="18" fill="#94a3b8">PERSONAL FINANCE  •  BUDGETING  •  SPENDING INSIGHTS</text>
+  <g transform="translate(850 95)">
+    <rect width="250" height="155" rx="18" fill="#111d30" stroke="#293b56"/>
+    <text x="24" y="34" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="14" fill="#94a3b8">MONTHLY BUDGET</text>
+    <text x="24" y="68" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="28" font-weight="700" fill="#f8fafc">₹10,000</text>
+    <rect x="24" y="88" width="202" height="10" rx="5" fill="#26364e"/>
+    <rect x="24" y="88" width="122" height="10" rx="5" fill="url(#accent)"/>
+    <text x="24" y="128" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="14" fill="#34d399">60% budget used</text>
+  </g>
+</svg>
