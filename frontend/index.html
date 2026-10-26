@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SpendSmart – Track every rupee. Spend smarter.</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
+  <script src="js/app.js" defer></script>
+</head>
+<body>
+  <!-- ===== Auth screen ===== -->
+  <main id="auth-view" class="auth hidden">
+    <section class="card auth-card">
+      <h1 class="brand">💸 Spend<span>Smart</span></h1>
+      <p class="tagline">Track every rupee. Spend smarter.</p>
+
+      <div class="tabs">
+        <button id="tab-login" class="tab active" type="button">Log in</button>
+        <button id="tab-register" class="tab" type="button">Sign up</button>
+      </div>
+
+      <form id="auth-form" autocomplete="on">
+        <label id="name-field" class="hidden">Full name
+          <input id="auth-name" type="text" maxlength="100" autocomplete="name" />
+        </label>
+        <label>Email
+          <input id="auth-email" type="email" required autocomplete="email" />
+        </label>
+        <label>Password
+          <input id="auth-password" type="password" minlength="8" maxlength="72" required
+                 autocomplete="current-password" />
+        </label>
+        <button id="auth-submit" class="btn primary" type="submit">Log in</button>
+        <p id="auth-error" class="error" role="alert"></p>
+      </form>
+    </section>
+  </main>
+
+  <!-- ===== Dashboard ===== -->
+  <div id="app-view" class="hidden">
+    <header class="topbar">
+      <h1 class="brand">💸 Spend<span>Smart</span></h1>
+      <div class="topbar-right">
+        <span id="user-name" class="muted"></span>
+        <button id="logout-btn" class="btn ghost" type="button">Log out</button>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="toolbar">
+        <label>Month <input id="month-picker" type="month" /></label>
+        <button id="export-btn" class="btn ghost" type="button">⬇ Export CSV</button>
+      </section>
+
+      <section class="stats">
+        <article class="card stat"><span class="muted">Spent</span><strong id="stat-spent">–</strong></article>
+        <article class="card stat"><span class="muted">Budget</span><strong id="stat-budget">–</strong></article>
+        <article class="card stat"><span class="muted">Remaining</span><strong id="stat-remaining">–</strong></article>
+        <article class="card stat"><span class="muted">Transactions</span><strong id="stat-count">–</strong></article>
+      </section>
+
+      <section class="card">
+        <div class="row-between">
+          <h2>Monthly budget</h2>
+          <form id="budget-form" class="inline-form">
+            <input id="budget-input" type="number" min="0" step="1" placeholder="Set budget" />
+            <button class="btn" type="submit">Save</button>
+          </form>
+        </div>
+        <div class="progress" aria-label="Budget used"><div id="progress-bar"></div></div>
+        <p id="progress-text" class="muted small"></p>
+      </section>
+
+      <section class="grid-2">
+        <article class="card">
+          <h2 id="form-title">Add expense</h2>
+          <form id="expense-form">
+            <label>Title <input id="e-title" maxlength="100" required placeholder="e.g. Groceries" /></label>
+            <div class="grid-2 tight">
+              <label>Amount <input id="e-amount" type="number" min="0.01" step="0.01" required /></label>
+              <label>Date <input id="e-date" type="date" required /></label>
+            </div>
+            <label>Category <select id="e-category"></select></label>
+            <label>Note (optional) <input id="e-note" maxlength="255" /></label>
+            <div class="row">
+              <button id="e-submit" class="btn primary" type="submit">Add expense</button>
+              <button id="e-cancel" class="btn ghost hidden" type="button">Cancel edit</button>
+            </div>
+            <p id="form-error" class="error" role="alert"></p>
+          </form>
+        </article>
+
+        <article class="card">
+          <h2>Spending by category</h2>
+          <div class="chart-box"><canvas id="category-chart"></canvas></div>
+          <p id="chart-empty" class="muted small hidden">No expenses this month yet.</p>
+        </article>
+      </section>
+
+      <section class="card">
+        <div class="row-between">
+          <h2>Expenses</h2>
+          <div class="inline-form">
+            <input id="search-input" type="search" placeholder="Search title…" />
+            <select id="filter-category"></select>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Date</th><th>Title</th><th>Category</th><th class="num">Amount</th><th></th></tr>
+            </thead>
+            <tbody id="expense-rows"></tbody>
+          </table>
+        </div>
+        <p id="table-empty" class="muted small hidden">Nothing here yet — add your first expense above.</p>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status"></div>
+</body>
+</html>
