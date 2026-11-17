@@ -3,122 +3,147 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SpendSmart – Track every rupee. Spend smarter.</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
-  <script src="js/app.js" defer></script>
+  <title>SpendSmart: Track every rupee. Spend smarter.</title>
+  <meta name="description" content="SpendSmart is a personal finance tracker with budgets, savings goals, recurring bills and clear spending insights." />
+  <meta name="theme-color" content="#0b1220" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
+  <link rel="stylesheet" href="css/theme.css" />
+  <link rel="stylesheet" href="css/landing.css" />
+  <script src="js/theme-init.js"></script>
+  <script type="module" src="js/landing.js"></script>
 </head>
 <body>
-  <!-- ===== Auth screen ===== -->
-  <main id="auth-view" class="auth hidden">
-    <section class="card auth-card">
-      <h1 class="brand">💸 Spend<span>Smart</span></h1>
-      <p class="tagline">Track every rupee. Spend smarter.</p>
+  <header class="nav">
+    <div class="container nav-inner">
+      <a class="brand" href="index.html"><img src="assets/favicon.svg" alt="" />Spend<span>Smart</span></a>
+      <nav class="nav-links" aria-label="Primary">
+        <a class="link" href="#features">Features</a>
+        <a class="link" href="#how">How it works</a>
+        <a class="link" href="#security">Security</a>
+        <div class="nav-actions">
+          <button id="theme-toggle" class="btn ghost icon" type="button" aria-label="Toggle theme"></button>
+          <a class="btn ghost" href="login.html">Log in</a>
+          <a class="btn primary" href="login.html#register">Get started</a>
+        </div>
+      </nav>
+    </div>
+  </header>
 
-      <div class="tabs">
-        <button id="tab-login" class="tab active" type="button">Log in</button>
-        <button id="tab-register" class="tab" type="button">Sign up</button>
+  <main>
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <span class="eyebrow"><b>New</b> Budgets, goals and recurring bills</span>
+          <h1>Know where every rupee goes. <em>Spend smarter.</em></h1>
+          <p class="lead">SpendSmart turns scattered expenses into a clear picture: what you earn, what you spend, what is left, and how to reach your goals sooner.</p>
+          <div class="cta-row">
+            <a class="btn primary lg" href="login.html#register">Create free account</a>
+            <a class="btn lg" href="#features">See what it does</a>
+          </div>
+          <p class="hero-note">Free and open source. No ads, no bank login required.</p>
+        </div>
+
+        <div class="preview" role="img" aria-label="Illustration of the SpendSmart dashboard">
+          <div class="preview-bar"><i></i><i></i><i></i></div>
+          <div class="preview-kpis">
+            <div class="kpi"><small>Spent</small><strong>₹24,380</strong><span class="up">▼ 8% vs last month</span></div>
+            <div class="kpi"><small>Income</small><strong>₹65,000</strong><span class="up">Salary + freelance</span></div>
+            <div class="kpi"><small>Saved</small><strong>62%</strong><span class="up">Savings rate</span></div>
+          </div>
+          <div class="preview-chart">
+            <small class="muted">Income vs expenses, last 6 months</small>
+            <div class="bars" aria-hidden="true">
+              <span style="height:62%"></span><span class="alt" style="height:40%"></span>
+              <span style="height:70%"></span><span class="alt" style="height:48%"></span>
+              <span style="height:66%"></span><span class="alt" style="height:35%"></span>
+              <span style="height:82%"></span><span class="alt" style="height:44%"></span>
+              <span style="height:76%"></span><span class="alt" style="height:38%"></span>
+              <span style="height:90%"></span><span class="alt" style="height:36%"></span>
+            </div>
+          </div>
+          <div class="preview-budget">
+            <div class="row"><span>Food budget</span><b>₹6,420 / ₹8,000</b></div>
+            <div class="progress"><div class="warn" style="width:80%"></div></div>
+          </div>
+        </div>
       </div>
+    </section>
 
-      <form id="auth-form" autocomplete="on">
-        <label id="name-field" class="hidden">Full name
-          <input id="auth-name" type="text" maxlength="100" autocomplete="name" />
-        </label>
-        <label>Email
-          <input id="auth-email" type="email" required autocomplete="email" />
-        </label>
-        <label>Password
-          <input id="auth-password" type="password" minlength="8" maxlength="72" required
-                 autocomplete="current-password" />
-        </label>
-        <button id="auth-submit" class="btn primary" type="submit">Log in</button>
-        <p id="auth-error" class="error" role="alert"></p>
-      </form>
+    <section class="section alt" id="features">
+      <div class="container">
+        <div class="section-head">
+          <h2>Everything you need to stay in control</h2>
+          <p>Simple enough for daily use, powerful enough to actually change your habits.</p>
+        </div>
+        <div class="features">
+        <article class="feature"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg></div><h3>Insights that explain your money</h3><p>Monthly totals, comparison with last month, a month-end projection and plain-English tips, not just charts.</p></article>
+        <article class="feature"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><h3>Income and savings rate</h3><p>Log what comes in as well as what goes out and see your net savings and savings rate at a glance.</p></article>
+        <article class="feature"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div><h3>Category budgets with alerts</h3><p>Set a limit per category. Bars turn amber at 80% and red when you go over, so surprises disappear.</p></article>
+        <article class="feature"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><h3>Savings goals with pacing</h3><p>Track an emergency fund or a new laptop and see exactly how much to put aside each month to hit the date.</p></article>
+        <article class="feature"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></div><h3>Recurring bills on autopilot</h3><p>Rent, subscriptions and EMIs are added automatically when they fall due. Pause any of them anytime.</p></article>
+        <article class="feature"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div><h3>Import and export CSV</h3><p>Bring in a spreadsheet or bank export and download everything whenever you like. Your data stays yours.</p></article>
+        <article class="feature"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><h3>Secure by design</h3><p>Hashed passwords, expiring tokens, login rate-limiting and strict per-user data isolation.</p></article>
+        <article class="feature"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div><h3>Light and dark, on any screen</h3><p>A fast, responsive interface that follows your device theme and works well on phones.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="how">
+      <div class="container">
+        <div class="section-head">
+          <h2>Up and running in minutes</h2>
+          <p>No complicated setup. Three steps and you have a financial dashboard.</p>
+        </div>
+        <div class="steps">
+          <article class="step"><h3>Create your account</h3><p>Sign up with your email. Your data is private to you and protected with industry-standard hashing.</p></article>
+          <article class="step"><h3>Add income and expenses</h3><p>Log items in seconds, set up recurring bills, or import a CSV from a spreadsheet or bank statement.</p></article>
+          <article class="step"><h3>Budget, save, improve</h3><p>Set category limits and goals, then follow the insights to spend less on what does not matter.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section alt" id="security">
+      <div class="container security">
+        <div>
+          <h2>Your money data deserves real security</h2>
+          <p>SpendSmart is built with the same practices used in production web apps, and the whole codebase is open for you to read.</p>
+        </div>
+        <ul class="checklist">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span>Passwords hashed with bcrypt, never stored in plain text</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span>Expiring JWT sessions and rate-limited sign-in against brute force</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span>Every record is scoped to its owner, so other users can never see yours</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span>Strict input validation, a content-security policy and safe CSV handling</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span>Delete your account and all its data at any time</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="cta-band">
+          <h2>Take control of your spending today</h2>
+          <p>Create a free account and see your first insight in under a minute.</p>
+          <div class="cta-row">
+            <a class="btn primary lg" href="login.html#register">Get started free</a>
+            <a class="btn lg" href="login.html">I already have an account</a>
+          </div>
+        </div>
+      </div>
     </section>
   </main>
 
-  <!-- ===== Dashboard ===== -->
-  <div id="app-view" class="hidden">
-    <header class="topbar">
-      <h1 class="brand">💸 Spend<span>Smart</span></h1>
-      <div class="topbar-right">
-        <span id="user-name" class="muted"></span>
-        <button id="logout-btn" class="btn ghost" type="button">Log out</button>
-      </div>
-    </header>
-
-    <main class="container">
-      <section class="toolbar">
-        <label>Month <input id="month-picker" type="month" /></label>
-        <button id="export-btn" class="btn ghost" type="button">⬇ Export CSV</button>
-      </section>
-
-      <section class="stats">
-        <article class="card stat"><span class="muted">Spent</span><strong id="stat-spent">–</strong></article>
-        <article class="card stat"><span class="muted">Budget</span><strong id="stat-budget">–</strong></article>
-        <article class="card stat"><span class="muted">Remaining</span><strong id="stat-remaining">–</strong></article>
-        <article class="card stat"><span class="muted">Transactions</span><strong id="stat-count">–</strong></article>
-      </section>
-
-      <section class="card">
-        <div class="row-between">
-          <h2>Monthly budget</h2>
-          <form id="budget-form" class="inline-form">
-            <input id="budget-input" type="number" min="0" step="1" placeholder="Set budget" />
-            <button class="btn" type="submit">Save</button>
-          </form>
-        </div>
-        <div class="progress" aria-label="Budget used"><div id="progress-bar"></div></div>
-        <p id="progress-text" class="muted small"></p>
-      </section>
-
-      <section class="grid-2">
-        <article class="card">
-          <h2 id="form-title">Add expense</h2>
-          <form id="expense-form">
-            <label>Title <input id="e-title" maxlength="100" required placeholder="e.g. Groceries" /></label>
-            <div class="grid-2 tight">
-              <label>Amount <input id="e-amount" type="number" min="0.01" step="0.01" required /></label>
-              <label>Date <input id="e-date" type="date" required /></label>
-            </div>
-            <label>Category <select id="e-category"></select></label>
-            <label>Note (optional) <input id="e-note" maxlength="255" /></label>
-            <div class="row">
-              <button id="e-submit" class="btn primary" type="submit">Add expense</button>
-              <button id="e-cancel" class="btn ghost hidden" type="button">Cancel edit</button>
-            </div>
-            <p id="form-error" class="error" role="alert"></p>
-          </form>
-        </article>
-
-        <article class="card">
-          <h2>Spending by category</h2>
-          <div class="chart-box"><canvas id="category-chart"></canvas></div>
-          <p id="chart-empty" class="muted small hidden">No expenses this month yet.</p>
-        </article>
-      </section>
-
-      <section class="card">
-        <div class="row-between">
-          <h2>Expenses</h2>
-          <div class="inline-form">
-            <input id="search-input" type="search" placeholder="Search title…" />
-            <select id="filter-category"></select>
-          </div>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr><th>Date</th><th>Title</th><th>Category</th><th class="num">Amount</th><th></th></tr>
-            </thead>
-            <tbody id="expense-rows"></tbody>
-          </table>
-        </div>
-        <p id="table-empty" class="muted small hidden">Nothing here yet — add your first expense above.</p>
-      </section>
-    </main>
-  </div>
-
-  <div id="toast" class="toast" role="status"></div>
+  <footer class="footer">
+    <div class="container footer-inner">
+      <span>© 2026 SpendSmart. A portfolio project, not a bank or certified financial advisor.</span>
+      <span>
+        <a href="https://github.com/SaiKiran0078/spendsmart" rel="noopener">GitHub</a> ·
+        <a href="/docs">API docs</a>
+      </span>
+    </div>
+  </footer>
 </body>
 </html>

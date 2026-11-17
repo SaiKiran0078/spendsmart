@@ -1,65 +1,58 @@
 # Architecture
 
-SpendSmart is a small, layered web application. A single FastAPI process serves
-both the JSON API (`/api/*`) and the static web UI (`/`).
+One FastAPI process serves the JSON API (`/api/*`) and the static website (`/`).
 
 ```mermaid
 flowchart LR
-    Browser["Browser UI<br/>(HTML + CSS + JS)"] -- "HTTPS / JSON + JWT" --> API["FastAPI app"]
-    subgraph API_Layer [Backend]
-        API --> Routers["Routers<br/>auth · expenses · summary"]
-        Routers --> Deps["Dependencies<br/>DB session · current user"]
-        Routers --> Schemas["Pydantic schemas<br/>(validation)"]
-        Routers --> ORM["SQLAlchemy models"]
-    end
-    ORM --> DB[("SQLite / PostgreSQL")]
+    B["Browser<br/>landing · login · dashboard"] -- "JSON + JWT" --> M["Middleware<br/>CORS · security headers"]
+    M --> R["Routers<br/>auth · expenses · income · budgets<br/>goals · recurring · summary"]
+    R --> S["Services<br/>analytics · recurring · goals · dates"]
+    R --> V["Pydantic schemas"]
+    S --> O["SQLAlchemy models"]
+    R --> O
+    O --> D[("SQLite")]
 ```
 
 ## Layers
 
-| Layer | Files | Responsibility |
+| Layer | Location | Responsibility |
 |---|---|---|
-| Routers | `app/routers/*.py` | HTTP endpoints, status codes, query params |
-| Schemas | `app/schemas.py` | Request/response validation (Pydantic) |
-| Models | `app/models.py` | Database tables (SQLAlchemy 2.0 ORM) |
-| Security | `app/security.py`, `app/deps.py` | Password hashing (bcrypt), JWT, auth dependency |
-| Config | `app/config.py` | Environment-based settings |
-| Database | `app/database.py` | Engine, session factory, `get_db` dependency |
+| Routers | `app/routers/` | HTTP concerns: paths, status codes, ownership checks |
+| Services | `app/services/` | Business logic: analytics, insights, recurring generation, goal pacing, date maths |
+| Schemas | `app/schemas.py` | Request/response validation |
+| Models | `app/models.py` | Tables and relationships |
+| Security | `security.py`, `deps.py`, `ratelimit.py` | bcrypt, JWT, current-user dependency, login limiter |
+| Frontend | `frontend/` | Landing page, sign-in page, dashboard SPA (hash router, ES modules) |
 
-## Key design decisions
+## Design decisions
 
-- **JWT bearer authentication** – stateless, easy to scale; tokens expire (default 60 min).
-- **bcrypt password hashing** – plaintext passwords are never stored or returned.
-- **Ownership checks on every expense query** – users can only read or change their own data;
-  other users' records return `404` so their existence is never leaked.
-- **Server-side validation** – amounts must be positive, categories come from a fixed enum.
-- **CSV formula-injection guard** – cells starting with `= + - @` are escaped on export.
-- **Dependency injection** – DB sessions and the current user are injected, which keeps
-  routers thin and makes tests easy (the DB dependency is overridden in `tests/conftest.py`).
-- **Config via environment** – no secrets in code; `.env.example` documents every variable.
-- **SQLite by default, PostgreSQL-ready** – change `DATABASE_URL` (and add `psycopg`) to switch.
+- **Ownership on every query.** Records of other users return `404`, so existence is never leaked.
+- **Pure logic is isolated.** `services/dates.py` has no framework imports, so month arithmetic (leap years, 31st-of-month bills) is unit-tested directly.
+- **Idempotent recurring bills.** `next_due` advances as expenses are created, so processing twice never duplicates; a start date anchor stops monthly bills drifting from the 31st to the 28th.
+- **Backward compatible.** v2 only adds tables and fields. Existing tables are untouched, so deployed databases upgrade without migrations.
+- **No `innerHTML` for data.** The UI builds DOM nodes with `textContent`; combined with a Content-Security-Policy this blocks XSS.
+- **Fail-safe config.** The app refuses to start with a missing, short or placeholder `SECRET_KEY`.
+- **Limiter trade-off.** The login limiter is in-memory (single instance). For several instances, move it to Redis.
 
 ## Data model
 
 ```mermaid
 erDiagram
     USERS ||--o{ EXPENSES : owns
-    USERS {
-        int id PK
-        string email UK
-        string full_name
-        string hashed_password
-        float monthly_budget
-        datetime created_at
-    }
-    EXPENSES {
-        int id PK
-        string title
-        float amount
-        string category
-        string note
-        date spent_on
-        int owner_id FK
-        datetime created_at
-    }
+    USERS ||--o{ INCOMES : owns
+    USERS ||--o{ CATEGORY_BUDGETS : owns
+    USERS ||--o{ GOALS : owns
+    USERS ||--o{ RECURRING_EXPENSES : owns
+    USERS { int id PK  string email UK  string full_name  string hashed_password  float monthly_budget }
+    EXPENSES { int id PK  string title  float amount  string category  date spent_on }
+    INCOMES { int id PK  string source  float amount  date received_on }
+    CATEGORY_BUDGETS { int id PK  string category  float limit_amount }
+    GOALS { int id PK  string name  float target_amount  float saved_amount  date deadline }
+    RECURRING_EXPENSES { int id PK  string title  float amount  string frequency  date next_due  bool active }
 ```
+
+## Known limitations
+
+- Amounts use floating point; switch to `Numeric`/integer minor units for real money.
+- Tables are created with `create_all`; adopt Alembic before changing existing columns.
+- Single-instance rate limiter (see above).

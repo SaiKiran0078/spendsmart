@@ -12,6 +12,7 @@ from sqlalchemy.pool import StaticPool  # noqa: E402
 
 from app.database import Base, get_db  # noqa: E402
 from app.main import app  # noqa: E402
+from app.ratelimit import login_limiter  # noqa: E402
 
 test_engine = create_engine(
     "sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool
@@ -22,6 +23,7 @@ TestingSession = sessionmaker(bind=test_engine, autoflush=False, autocommit=Fals
 @pytest.fixture(autouse=True)
 def fresh_database():
     Base.metadata.create_all(bind=test_engine)
+    login_limiter.reset()  # failed-login counters must not leak between tests
     yield
     Base.metadata.drop_all(bind=test_engine)
 

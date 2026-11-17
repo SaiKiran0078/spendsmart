@@ -1,315 +1,140 @@
-"use strict";
+// Application shell: auth guard, sidebar, month switcher and hash-based routing.
+import { ApiError, api, getToken, setToken } from "./api.js";
+import { destroyCharts } from "./charts.js";
+import { openExpenseForm } from "./forms.js";
+import { icon } from "./icons.js";
+import { render as dashboard } from "./pages/dashboard.js";
+import { render as transactions } from "./pages/transactions.js";
+import { render as budgets } from "./pages/budgets.js";
+import { render as goals } from "./pages/goals.js";
+import { render as recurring } from "./pages/recurring.js";
+import { render as settings } from "./pages/settings.js";
+import { bindThemeToggle } from "./theme.js";
+import { $, h, loading, monthLabel, toast } from "./ui.js";
 
-const API = "/api";
-const CURRENCY = "₹";
-const CATEGORIES = [
-  "Food", "Transport", "Rent", "Utilities", "Shopping",
-  "Health", "Entertainment", "Education", "Other",
-];
+const ROUTES = {
+  dashboard: { title: "Dashboard", icon: "home", render: dashboard, month: true },
+  transactions: { title: "Transactions", icon: "list", render: transactions, month: true },
+  budgets: { title: "Budgets", icon: "pie", render: budgets, month: true },
+  goals: { title: "Savings goals", icon: "target", render: goals },
+  recurring: { title: "Recurring bills", icon: "repeat", render: recurring },
+  settings: { title: "Settings", icon: "sliders", render: settings },
+};
 
-let token = localStorage.getItem("spendsmart_token");
-let editingId = null;
-let chart = null;
-let searchTimer = null;
+const now = new Date();
+const state = { user: null, month: { year: now.getFullYear(), month: now.getMonth() + 1 }, renderToken: 0 };
 
-const $ = (selector) => document.querySelector(selector);
-const money = (n) => `${CURRENCY}${Number(n).toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
-const todayISO = () => new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD in local time
+function currentRoute() {
+  const name = location.hash.replace(/^#\/?/, "");
+  return ROUTES[name] ? name : "dashboard";
+}
 
-/* ---------- API helper ---------- */
-async function api(path, { method = "GET", body, form, raw = false } = {}) {
-  const headers = {};
-  let payload;
-  if (token) headers.Authorization = `Bearer ${token}`;
-  if (form) {
-    payload = new URLSearchParams(form);
-  } else if (body) {
-    headers["Content-Type"] = "application/json";
-    payload = JSON.stringify(body);
+async function renderRoute() {
+  const name = currentRoute();
+  const route = ROUTES[name];
+  const token = ++state.renderToken;
+
+  document.title = `${route.title} · SpendSmart`;
+  $("#page-title").textContent = route.title;
+  $("#month-switch").classList.toggle("hidden", !route.month);
+  for (const link of document.querySelectorAll(".nav-item")) {
+    link.classList.toggle("active", link.dataset.route === name);
+    if (link.dataset.route === name) link.setAttribute("aria-current", "page");
+    else link.removeAttribute("aria-current");
   }
-  const res = await fetch(API + path, { method, headers, body: payload });
+  $("#month-label").textContent = monthLabel(state.month.year, state.month.month);
+  const selectedMonth = new Date(state.month.year, state.month.month - 1, 1);
+  const currentMonth = new Date();
+  $("#month-next").disabled = selectedMonth >= new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+  closeMenu();
 
-  if (res.status === 401 && token) {
-    logout();
-    throw new Error("Session expired. Please log in again.");
-  }
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    const detail = Array.isArray(err.detail) ? err.detail.map((d) => d.msg).join(", ") : err.detail;
-    throw new Error(detail || "Something went wrong");
-  }
-  if (raw) return res;
-  return res.status === 204 ? null : res.json();
-}
+  const view = $("#view");
+  destroyCharts();
+  view.replaceChildren(loading());
 
-function toast(message) {
-  const el = $("#toast");
-  el.textContent = message;
-  el.classList.add("show");
-  setTimeout(() => el.classList.remove("show"), 2200);
-}
-
-/* ---------- Auth ---------- */
-let mode = "login";
-
-function setMode(next) {
-  mode = next;
-  const isRegister = next === "register";
-  $("#tab-login").classList.toggle("active", !isRegister);
-  $("#tab-register").classList.toggle("active", isRegister);
-  $("#name-field").classList.toggle("hidden", !isRegister);
-  $("#auth-name").required = isRegister;
-  $("#auth-submit").textContent = isRegister ? "Create account" : "Log in";
-  $("#auth-password").autocomplete = isRegister ? "new-password" : "current-password";
-  $("#auth-error").textContent = "";
-}
-
-async function handleAuth(event) {
-  event.preventDefault();
-  const email = $("#auth-email").value.trim();
-  const password = $("#auth-password").value;
-  $("#auth-error").textContent = "";
-  try {
-    if (mode === "register") {
-      await api("/auth/register", {
-        method: "POST",
-        body: { email, password, full_name: $("#auth-name").value.trim() },
-      });
-    }
-    const data = await api("/auth/login", { method: "POST", form: { username: email, password } });
-    token = data.access_token;
-    localStorage.setItem("spendsmart_token", token);
-    $("#auth-form").reset();
-    await showApp();
-  } catch (err) {
-    $("#auth-error").textContent = err.message;
-  }
-}
-
-function logout() {
-  token = null;
-  localStorage.removeItem("spendsmart_token");
-  $("#app-view").classList.add("hidden");
-  $("#auth-view").classList.remove("hidden");
-}
-
-/* ---------- Dashboard ---------- */
-function monthBounds() {
-  const [year, month] = $("#month-picker").value.split("-").map(Number);
-  const pad = (n) => String(n).padStart(2, "0");
-  const lastDay = new Date(year, month, 0).getDate();
-  return { year, month, start: `${year}-${pad(month)}-01`, end: `${year}-${pad(month)}-${pad(lastDay)}` };
-}
-
-async function loadSummary() {
-  const { year, month } = monthBounds();
-  const s = await api(`/summary?year=${year}&month=${month}`);
-
-  $("#stat-spent").textContent = money(s.total_spent);
-  $("#stat-budget").textContent = s.monthly_budget > 0 ? money(s.monthly_budget) : "Not set";
-  $("#stat-remaining").textContent = s.monthly_budget > 0 ? money(s.remaining) : "–";
-  $("#stat-count").textContent = s.expense_count;
-
-  const bar = $("#progress-bar");
-  bar.style.width = `${Math.min(s.budget_used_percent, 100)}%`;
-  bar.style.background =
-    s.budget_used_percent >= 100 ? "var(--danger)" : s.budget_used_percent >= 80 ? "var(--warn)" : "var(--accent)";
-  $("#progress-text").textContent =
-    s.monthly_budget > 0 ? `${s.budget_used_percent}% of your budget used` : "Set a monthly budget to track progress.";
-
-  drawChart(s.by_category);
-}
-
-function drawChart(items) {
-  $("#chart-empty").classList.toggle("hidden", items.length > 0);
-  $("#category-chart").classList.toggle("hidden", items.length === 0);
-  if (chart) chart.destroy();
-  if (!items.length || typeof Chart === "undefined") return;
-  chart = new Chart($("#category-chart"), {
-    type: "doughnut",
-    data: {
-      labels: items.map((i) => i.category),
-      datasets: [{
-        data: items.map((i) => i.total),
-        backgroundColor: ["#2dd4a7", "#60a5fa", "#f472b6", "#fbbf24", "#a78bfa", "#fb7185", "#34d399", "#f97316", "#94a3b8"],
-        borderWidth: 0,
-      }],
-    },
-    options: { maintainAspectRatio: false, plugins: { legend: { position: "right", labels: { color: "#8da0c3" } } } },
-  });
-}
-
-async function loadExpenses() {
-  const { start, end } = monthBounds();
-  const params = new URLSearchParams({ start_date: start, end_date: end });
-  const category = $("#filter-category").value;
-  const search = $("#search-input").value.trim();
-  if (category) params.set("category", category);
-  if (search) params.set("search", search);
-
-  const expenses = await api(`/expenses?${params}`);
-  const body = $("#expense-rows");
-  body.replaceChildren();
-  $("#table-empty").classList.toggle("hidden", expenses.length > 0);
-
-  for (const e of expenses) {
-    const tr = document.createElement("tr");
-    const cell = (text, className) => {
-      const td = document.createElement("td");
-      td.textContent = text; // textContent (never innerHTML) prevents XSS
-      if (className) td.className = className;
-      tr.appendChild(td);
-      return td;
-    };
-    cell(e.spent_on);
-    cell(e.title);
-    const catCell = cell("");
-    const pill = document.createElement("span");
-    pill.className = "pill";
-    pill.textContent = e.category;
-    catCell.appendChild(pill);
-    cell(money(e.amount), "num");
-
-    const actions = cell("", "actions");
-    const editBtn = Object.assign(document.createElement("button"), { className: "btn small", textContent: "Edit" });
-    const delBtn = Object.assign(document.createElement("button"), { className: "btn small danger", textContent: "Delete" });
-    editBtn.addEventListener("click", () => startEdit(e));
-    delBtn.addEventListener("click", () => removeExpense(e.id));
-    actions.append(editBtn, " ", delBtn);
-    body.appendChild(tr);
-  }
-}
-
-async function refresh() {
-  try {
-    await Promise.all([loadSummary(), loadExpenses()]);
-  } catch (err) {
-    toast(err.message);
-  }
-}
-
-/* ---------- Expense form ---------- */
-function resetForm() {
-  editingId = null;
-  $("#expense-form").reset();
-  $("#e-date").value = todayISO();
-  $("#form-title").textContent = "Add expense";
-  $("#e-submit").textContent = "Add expense";
-  $("#e-cancel").classList.add("hidden");
-  $("#form-error").textContent = "";
-}
-
-function startEdit(expense) {
-  editingId = expense.id;
-  $("#e-title").value = expense.title;
-  $("#e-amount").value = expense.amount;
-  $("#e-date").value = expense.spent_on;
-  $("#e-category").value = expense.category;
-  $("#e-note").value = expense.note || "";
-  $("#form-title").textContent = "Edit expense";
-  $("#e-submit").textContent = "Save changes";
-  $("#e-cancel").classList.remove("hidden");
-  $("#expense-form").scrollIntoView({ behavior: "smooth", block: "center" });
-}
-
-async function submitExpense(event) {
-  event.preventDefault();
-  const body = {
-    title: $("#e-title").value.trim(),
-    amount: Number($("#e-amount").value),
-    spent_on: $("#e-date").value,
-    category: $("#e-category").value,
-    note: $("#e-note").value.trim() || null,
+  const ctx = {
+    view,
+    get user() { return state.user; },
+    month: { ...state.month },
+    isCurrent: () => token === state.renderToken,
+    reload: renderRoute,
+    refreshUser: async () => { state.user = await api.get("/auth/me"); paintUser(); return state.user; },
   };
   try {
-    if (editingId) {
-      await api(`/expenses/${editingId}`, { method: "PUT", body });
-      toast("Expense updated");
-    } else {
-      await api("/expenses", { method: "POST", body });
-      toast("Expense added");
-    }
-    resetForm();
-    await refresh();
+    await route.render(ctx);
+    if (ctx.isCurrent()) view.focus({ preventScroll: true });
   } catch (err) {
-    $("#form-error").textContent = err.message;
+    if (!ctx.isCurrent()) return;
+    view.replaceChildren(h("div", { class: "card empty" },
+      h("h3", {}, "Something went wrong"),
+      h("p", {}, err instanceof ApiError ? err.message : "Please try again."),
+      h("button", { class: "btn", type: "button", onClick: renderRoute }, "Retry")));
   }
 }
 
-async function removeExpense(id) {
-  if (!confirm("Delete this expense?")) return;
-  try {
-    await api(`/expenses/${id}`, { method: "DELETE" });
-    toast("Expense deleted");
-    await refresh();
-  } catch (err) {
-    toast(err.message);
-  }
+function shiftMonth(delta) {
+  const date = new Date(state.month.year, state.month.month - 1 + delta, 1);
+  const today = new Date();
+  const currentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  if (date > currentMonth) return;
+  state.month = { year: date.getFullYear(), month: date.getMonth() + 1 };
+  renderRoute();
 }
 
-async function saveBudget(event) {
-  event.preventDefault();
-  const value = Number($("#budget-input").value);
-  try {
-    await api("/auth/me/budget", { method: "PUT", body: { monthly_budget: value } });
-    toast("Budget saved");
-    await loadSummary();
-  } catch (err) {
-    toast(err.message);
-  }
+function paintUser() {
+  const { full_name: name, email } = state.user || {};
+  const safeName = typeof name === "string" && name.trim() ? name.trim() : "Your account";
+  $("#user-name").textContent = safeName;
+  $("#user-email").textContent = typeof email === "string" ? email : "";
+  $("#avatar").textContent = safeName[0].toUpperCase();
 }
 
-async function exportCsv() {
-  try {
-    const res = await api("/expenses/export/csv", { raw: true });
-    const url = URL.createObjectURL(await res.blob());
-    const link = Object.assign(document.createElement("a"), { href: url, download: "expenses.csv" });
-    link.click();
-    URL.revokeObjectURL(url);
-  } catch (err) {
-    toast(err.message);
+const openMenu = () => { $("#sidebar").classList.add("open"); $("#scrim").classList.add("show"); };
+function closeMenu() { $("#sidebar").classList.remove("open"); $("#scrim").classList.remove("show"); }
+
+function buildShell() {
+  const nav = $("#side-nav");
+  for (const [name, route] of Object.entries(ROUTES)) {
+    nav.append(h("a", { class: "nav-item", href: `#/${name}`, dataset: { route: name } }, icon(route.icon), route.title));
   }
+  $("#menu-btn").append(icon("menu"));
+  $("#quick-add").append(icon("plus"), h("span", {}, "Add expense"));
+  bindThemeToggle($("#theme-toggle"));
+
+  $("#menu-btn").addEventListener("click", openMenu);
+  $("#scrim").addEventListener("click", closeMenu);
+  $("#month-prev").addEventListener("click", () => shiftMonth(-1));
+  $("#month-next").addEventListener("click", () => shiftMonth(1));
+  $("#quick-add").addEventListener("click", () => openExpenseForm({ onSaved: renderRoute }));
+  $("#logout-btn").addEventListener("click", () => { setToken(null); location.replace("login.html"); });
+  document.addEventListener("themechange", renderRoute); // charts read theme colours at draw time
+  window.addEventListener("hashchange", renderRoute);
 }
 
-/* ---------- Boot ---------- */
-async function showApp() {
+(async function start() {
+  if (!getToken()) { location.replace("login.html"); return; }
+  buildShell();
   try {
-    const me = await api("/auth/me");
-    $("#user-name").textContent = me.full_name;
-    $("#budget-input").value = me.monthly_budget || "";
+    state.user = await api.get("/auth/me");
   } catch {
-    return; // api() already logged the user out on 401
+    setToken(null);
+    location.replace("login.html");
+    return;
   }
-  $("#auth-view").classList.add("hidden");
-  $("#app-view").classList.remove("hidden");
-  await refresh();
-}
+  paintUser();
+  try {
+    const result = await api.post("/recurring/process");
+    if (result && result.created > 0) toast(`Added ${result.created} recurring bill${result.created > 1 ? "s" : ""} that came due`);
+  } catch { /* not critical */ }
+  renderRoute();
+})();
 
-function init() {
-  for (const select of [$("#e-category"), $("#filter-category")]) {
-    if (select.id === "filter-category") select.add(new Option("All categories", ""));
-    CATEGORIES.forEach((c) => select.add(new Option(c, c)));
-  }
-  $("#month-picker").value = todayISO().slice(0, 7);
-  $("#e-date").value = todayISO();
 
-  $("#tab-login").addEventListener("click", () => setMode("login"));
-  $("#tab-register").addEventListener("click", () => setMode("register"));
-  $("#auth-form").addEventListener("submit", handleAuth);
-  $("#logout-btn").addEventListener("click", logout);
-  $("#expense-form").addEventListener("submit", submitExpense);
-  $("#e-cancel").addEventListener("click", resetForm);
-  $("#budget-form").addEventListener("submit", saveBudget);
-  $("#export-btn").addEventListener("click", exportCsv);
-  $("#month-picker").addEventListener("change", refresh);
-  $("#filter-category").addEventListener("change", loadExpenses);
-  $("#search-input").addEventListener("input", () => {
-    clearTimeout(searchTimer);
-    searchTimer = setTimeout(loadExpenses, 300); // debounce typing
+// Installable PWA shell. Authenticated API responses are deliberately never cached.
+if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => {
+      // The app remains fully usable when service-worker installation is unavailable.
+    });
   });
-
-  if (token) showApp();
-  else $("#auth-view").classList.remove("hidden");
 }
-
-document.addEventListener("DOMContentLoaded", init);

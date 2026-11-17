@@ -8,7 +8,7 @@
 
 ### Track Every Rupee. Spend Smarter.
 
-A modern, full-stack expense tracking application built with **FastAPI, SQLAlchemy, and vanilla JavaScript** to help users manage expenses, monitor monthly budgets, visualize spending patterns, and export transaction records.
+A full-stack personal finance web app built with **FastAPI, SQLAlchemy and vanilla JavaScript**. Track expenses and income, set category budgets, follow savings goals, automate recurring bills and get plain-English spending insights, all behind secure authentication.
 
 <br>
 
@@ -17,591 +17,315 @@ A modern, full-stack expense tracking application built with **FastAPI, SQLAlche
 
 <br>
 
+[![CI](https://github.com/SaiKiran0078/spendsmart/actions/workflows/ci.yml/badge.svg)](https://github.com/SaiKiran0078/spendsmart/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=flat-square&logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688?style=flat-square&logo=fastapi&logoColor=white)
-![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-ORM-D71F00?style=flat-square)
-![JavaScript](https://img.shields.io/badge/JavaScript-Frontend-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
+![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0-D71F00?style=flat-square)
+![JavaScript](https://img.shields.io/badge/JavaScript-ES_Modules-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
 ![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?style=flat-square&logo=docker&logoColor=white)
-![Pytest](https://img.shields.io/badge/Tests-25_Passing-0A9EDC?style=flat-square)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
-
-</div>
 
 ---
 
 ## 📌 Table of Contents
 
 - [✨ Overview](#-overview)
-- [🚀 Live Application](#-live-application)
-- [📸 Application Screenshots](#-application-screenshots)
-- [🌟 Key Features](#-key-features)
+- [🆕 What's New in v2](#-whats-new-in-v2)
+- [📸 Screenshots](#-screenshots)
+- [🌟 Features](#-features)
 - [🛠️ Technology Stack](#️-technology-stack)
 - [🏗️ Architecture](#️-architecture)
 - [📂 Project Structure](#-project-structure)
 - [⚙️ Getting Started](#️-getting-started)
-- [🐳 Docker Setup](#-docker-setup)
-- [🔐 Environment Configuration](#-environment-configuration)
+- [🐳 Docker](#-docker)
+- [🔐 Configuration](#-configuration)
+- [🎬 Demo Data](#-demo-data)
 - [🔌 API Overview](#-api-overview)
-- [🧪 Testing and Code Quality](#-testing-and-code-quality)
+- [🧪 Testing & Code Quality](#-testing--code-quality)
 - [☁️ Deployment](#️-deployment)
+- [🔒 Security](#-security)
+- [🗺️ Roadmap](#️-roadmap)
 - [📚 Documentation](#-documentation)
-- [🔒 Security Considerations](#-security-considerations)
-- [🗺️ Future Improvements](#️-future-improvements)
 - [👨‍💻 Author](#-author)
 
 ---
 
 ## ✨ Overview
 
-**SpendSmart** is a web-based personal expense management application designed to make everyday financial tracking straightforward and accessible.
+Most people don't know where their money goes until the month is over. **SpendSmart** makes it easy to log what you earn and spend, set limits, and see — at a glance — what is left, what is trending, and what to do next.
 
-Users can create an account, securely log in, record transactions, organize expenses by category, set a monthly budget, and review their spending through a visual dashboard.
+It is built as a portfolio project that demonstrates production-style practices: layered architecture, authentication and authorisation, input validation, automated tests, CI, containerisation and deployment.
 
-The application combines a lightweight JavaScript frontend with a Python backend, RESTful API endpoints, database persistence, and containerized deployment.
+## 🆕 What's New in v2
 
-### 🎯 Project Objectives
+| Area | Upgrade |
+|---|---|
+| **Website** | Marketing landing page, dedicated sign-in page and a multi-page dashboard app (sidebar navigation, month switcher, light/dark theme, mobile-friendly) |
+| **Insights** | Savings rate, comparison with last month, month-end projection, daily spending chart, top expenses and plain-English tips |
+| **Income** | Track income alongside expenses; 6-month income-vs-expenses chart |
+| **Category budgets** | Per-category limits with *ok / warning / over* status |
+| **Savings goals** | Progress rings, add/withdraw funds and a "save X per month" hint |
+| **Recurring bills** | Weekly / monthly / yearly bills that are added automatically when due; pause and resume |
+| **CSV import** | Bulk-add expenses from a CSV (flexible dates and amounts); exports re-import cleanly |
+| **Account tools** | Edit profile, change password, delete account and all data |
+| **Security** | Login rate-limiting, security headers + Content-Security-Policy |
+| **Quality** | 100+ automated tests, demo-data seed script, versioned API (`2.0.0`) |
 
-- Simplify personal expense tracking.
-- Provide a clear overview of monthly spending.
-- Help users compare expenses against their budget.
-- Make transaction records searchable and exportable.
-- Demonstrate practical full-stack development, API design, testing, and deployment.
-
----
-
-## 🚀 Live Application
-
-**Try SpendSmart:** https://spendsmart-794k.onrender.com
-
-The application is deployed as a Docker-based web service on Render.
-
-> **Demo note:** The free hosting environment may take a short time to respond after inactivity. Treat the live instance as a demonstration rather than a permanent financial record system. Data persistence depends on the deployed database configuration and hosting storage.
-
----
+All v1 endpoints keep working, and no existing database tables were altered, so an existing deployment upgrades without migrations (new tables are created on start-up).
 
 ## 📸 Application Screenshots
 
-The screenshots below show the application's authentication pages and expense management interface.
-
-### 🔐 Login
-
-Sign in to access the expense dashboard.
+The screenshots below are captured from the running SpendSmart application. The landing-page capture is retained; the authenticated application screens have been refreshed.
 
 <p align="center">
-  <img src="docs/screenshots/login.png" alt="SpendSmart login page" width="85%">
+  <img src="assets/readme/screenshots/landing-page.png" alt="SpendSmart landing page" width="100%">
 </p>
-
-### 📝 Create an Account
-
-Register an account with your name, email address, and password.
-
 <p align="center">
-  <img src="docs/screenshots/register.png" alt="SpendSmart registration page" width="85%">
+  <img src="assets/readme/screenshots/login.png" alt="SpendSmart login and registration" width="100%">
 </p>
-
-### 📊 Dashboard
-
-Review monthly spending, budget allocation, remaining balance, transaction count, and category-wise spending.
-
 <p align="center">
-  <img src="docs/screenshots/dashboard.png" alt="SpendSmart expense dashboard" width="100%">
+  <img src="assets/readme/screenshots/dashboard.png" alt="SpendSmart dashboard with financial KPIs, charts and insights" width="100%">
 </p>
-
-### 💳 Expense Management
-
-View recorded transactions, search by title, filter by category, and access available editing and deletion actions.
-
 <p align="center">
-  <img src="docs/screenshots/expenses.png" alt="SpendSmart expense management table" width="100%">
+  <img src="assets/readme/screenshots/transactions.png" alt="SpendSmart transactions with search, filters and CSV controls" width="100%">
+</p>
+<p align="center">
+  <img src="assets/readme/screenshots/budgets.png" alt="SpendSmart monthly and category budgets" width="100%">
+</p>
+<p align="center">
+  <img src="assets/readme/screenshots/savings-goals.png" alt="SpendSmart savings goals and progress" width="100%">
+</p>
+<p align="center">
+  <img src="assets/readme/screenshots/recurring-bills.png" alt="SpendSmart recurring bills and due dates" width="100%">
 </p>
 
----
 
-## 🌟 Key Features
+## 🌟 Features
 
-### 👤 1. User Authentication
+### 📊 Dashboard & insights
+- Monthly spent / income / net savings / budget-left cards with change vs. last month
+- Income-vs-expenses chart (6 months), category doughnut and daily spending line
+- Month-end **projection** and **plain-English insights** (e.g. *"Food is your biggest category at 38%"*)
+- Upcoming bills and biggest expenses
 
-- User registration and login.
-- Password hashing with bcrypt.
-- JWT-based authentication.
-- Protected API endpoints for authenticated operations.
+### 💰 Transactions
+- Expenses **and** income with add / edit / delete
+- Search, category filter, month or all-time scope, pagination
+- **CSV import & export** (formula-injection safe, round-trip friendly)
 
-### 💰 2. Expense Management
+### 🎯 Budgets
+- Overall monthly budget with progress bar
+- Per-category limits that turn amber at 80 % and red at 100 %
 
-- Add expenses with a title, amount, date, category, and optional note.
-- View recorded transactions.
-- Edit existing expenses.
-- Delete expenses when they are no longer needed.
-- Organize spending by category.
+### 🏆 Savings goals
+- Target amount and optional date, progress ring, add or withdraw funds
+- Automatic monthly-saving suggestion to hit the date
 
-### 📊 3. Financial Dashboard
+### 🔁 Recurring bills
+- Weekly, monthly or yearly; month-end dates handled correctly (31st → 30th/28th, then back)
+- Added automatically when due; idempotent; pause/resume
 
-- Total spending for the selected month.
-- Monthly budget.
-- Remaining budget.
-- Number of transactions.
-- Category-wise spending visualization.
-- Visual indication of budget utilization.
+### 👤 Account
+- Register / login with JWT, change password, update profile, delete account and all data
+- Light/dark theme and currency display preference
 
-### 🎯 4. Monthly Budget Tracking
-
-- Set a monthly spending budget.
-- Compare recorded spending with the configured budget.
-- View the remaining budget and percentage utilized.
-
-### 🔎 5. Search and Filtering
-
-- Search expenses by title.
-- Filter transactions by category.
-- Review relevant transaction records more easily.
-
-### 📥 6. CSV Export
-
-Export expense records as a CSV file for further analysis using spreadsheet applications or data analysis tools.
-
-### 🐳 7. Containerized Deployment
-
-- Docker-based application packaging.
-- Docker Compose configuration for local execution.
-- Environment-based configuration.
-- Health-check support.
-- GitHub Actions continuous integration workflow.
-
----
-
+### 📱 Responsive experience
+- Adaptive layouts for desktop, tablet and narrow mobile screens
+- Touch-friendly navigation, controls and forms with a slide-in mobile sidebar
+- Responsive KPI cards, charts, category cards and horizontally scrollable data tables
+- Reduced-motion support and safe-area spacing for modern mobile devices
+- Installable Progressive Web App shell with app icons and a service worker; private API responses are never cached\n
 ## 🛠️ Technology Stack
 
-| Layer | Technologies | Purpose |
-|---|---|---|
-| Backend | Python, FastAPI | Application logic and REST API |
-| Data Validation | Pydantic | Request and configuration validation |
-| Database Access | SQLAlchemy | Database models and persistence |
-| Database | SQLite by default | Relational data storage |
-| Authentication | JWT, PyJWT | Token-based authentication |
-| Password Security | bcrypt | Password hashing |
-| Frontend | HTML5, CSS3, JavaScript | User interface and interactions |
-| Data Visualization | JavaScript charting | Category-wise spending visualization |
-| Testing | Pytest | Automated testing |
-| Linting | Ruff | Python code-quality checks |
-| Containerization | Docker, Docker Compose | Reproducible application execution |
-| CI/CD | GitHub Actions | Automated testing, linting, and image build |
-| Deployment | Render | Public web application hosting |
-| Version Control | Git, GitHub | Source control and collaboration |
-
----
+| Layer | Technologies |
+|---|---|
+| Backend | Python 3.12, FastAPI, Pydantic v2 |
+| Database | SQLAlchemy 2.0 ORM, SQLite (default) |
+| Auth & security | JWT (PyJWT), bcrypt, in-memory login rate-limiter, CSP + security headers |
+| Frontend | HTML5, CSS3 (design tokens), vanilla JavaScript (ES modules), Chart.js |
+| Testing | pytest, pytest-cov, httpx |
+| Quality | Ruff |
+| DevOps | Docker, Docker Compose, GitHub Actions, Render |
 
 ## 🏗️ Architecture
 
-SpendSmart follows a client-server architecture.
-
 ```text
-┌────────────────────────────────────────────┐
-│               User / Browser               │
-└──────────────────────┬─────────────────────┘
-                       │
-                       ▼
-┌────────────────────────────────────────────┐
-│             Frontend Application           │
-│                                            │
-│       HTML  │  CSS  │  JavaScript          │
-└──────────────────────┬─────────────────────┘
-                       │
-                       │ HTTP / JSON
-                       ▼
-┌────────────────────────────────────────────┐
-│              FastAPI Backend               │
-│                                            │
-│   Authentication │ Validation │ Endpoints  │
-└──────────────────────┬─────────────────────┘
-                       │
-                       ▼
-┌────────────────────────────────────────────┐
-│             SQLAlchemy ORM                 │
-└──────────────────────┬─────────────────────┘
-                       │
-                       ▼
-┌────────────────────────────────────────────┐
-│          Relational Database               │
-│                 SQLite                     │
-└────────────────────────────────────────────┘
+Browser (landing · login · dashboard SPA)
+        │  JSON + JWT bearer token
+        ▼
+FastAPI  ──►  Routers (auth · expenses · income · budgets · goals · recurring · summary)
+                 │
+                 ├─► Services (analytics · recurring · goals · dates)   ← business logic
+                 ├─► Pydantic schemas                                   ← validation
+                 └─► SQLAlchemy models ─► SQLite
 ```
 
-### Request Flow
-
-1. A user interacts with the frontend.
-2. JavaScript sends HTTP requests to the FastAPI backend.
-3. The backend validates the request and checks authentication where required.
-4. SQLAlchemy handles database operations.
-5. The API returns the appropriate response.
-6. The frontend updates the displayed information.
-
----
+Routers stay thin; calculations live in `app/services/` so they are easy to unit-test. See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for diagrams and design decisions.
 
 ## 📂 Project Structure
 
 ```text
 spendsmart/
-│
 ├── .github/
 │   ├── ISSUE_TEMPLATE/
-│   ├── PULL_REQUEST_TEMPLATE.md
-│   └── workflows/
-│       └── ci.yml
-│
-├── app/
-│   ├── main.py
-│   ├── config.py
-│   ├── database.py
-│   ├── models.py
-│   ├── schemas.py
-│   ├── security.py
-│   └── ...
-│
-├── frontend/
-│   ├── index.html
-│   ├── css/
-│   │   └── style.css
-│   └── js/
-│       └── app.js
-│
-├── tests/
-│   ├── conftest.py
-│   └── ...
-│
-├── docs/
-│   ├── API.md
-│   ├── ARCHITECTURE.md
-│   ├── QUALITY_REVIEW.md
-│   └── screenshots/
-│       ├── login.png
-│       ├── register.png
-│       ├── dashboard.png
-│       └── expenses.png
-│
-├── .env.example
-├── .gitattributes
-├── .gitignore
-├── Dockerfile
-├── docker-compose.yml
-├── pyproject.toml
-├── requirements.txt
-├── requirements-dev.txt
-└── README.md
+│   ├── pull_request_template.md
+│   └── workflows/ci.yml
+├── app/                      # FastAPI backend
+│   ├── main.py               # App, middleware, routers, static site
+│   ├── config.py  database.py  models.py  schemas.py
+│   ├── security.py  deps.py  ratelimit.py
+│   ├── routers/              # auth · expenses · income · budgets · goals · recurring · summary
+│   └── services/             # analytics · recurring · goals · dates
+├── frontend/                 # Static website (served by FastAPI)
+│   ├── index.html            # Landing page
+│   ├── login.html            # Sign in / sign up
+│   ├── app.html              # Dashboard shell
+│   ├── manifest.webmanifest  # Installable app metadata
+│   ├── sw.js                 # Static-shell service worker (API is network-only)
+│   ├── assets/               # Logo, favicon and PWA icons
+│   ├── css/                  # theme.css · landing.css · app.css
+│   └── js/                   # api · ui · forms · charts · router, plus pages/
+├── tests/                    # 100+ pytest tests
+├── scripts/seed_demo.py      # Demo data generator
+├── docs/                     # API.md · ARCHITECTURE.md · QUALITY_REVIEW.md
+├── assets/
+│   ├── banner.svg
+│   └── readme/screenshots/    # Actual product screenshots used above
+├── Dockerfile  docker-compose.yml  Makefile
+├── pyproject.toml  requirements*.txt  .env.example
+└── README.md  LICENSE  CONTRIBUTING.md
 ```
-
-> **Note:** The tree above highlights the main project components. Keep the file names and folders consistent with the actual repository. The `app/` and `tests/` directories may contain additional modules and test files.
-
----
 
 ## ⚙️ Getting Started
 
-Follow these steps to run SpendSmart locally.
-
-### Prerequisites
-
-Install the following:
-
-- Python 3.12
-- Git
-- A terminal such as PowerShell, Command Prompt, or Bash
-
-Docker is optional if you prefer containerized execution.
-
-### 1. Clone the Repository
+**Prerequisites:** Python 3.12, Git (Docker optional).
 
 ```bash
 git clone https://github.com/SaiKiran0078/spendsmart.git
 cd spendsmart
 ```
 
-### 2. Create a Virtual Environment
-
-**Windows PowerShell:**
+**Create a virtual environment**
 
 ```powershell
+# Windows PowerShell
 py -3.12 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
-
-If PowerShell blocks activation, you can use Command Prompt instead:
-
-```bat
-.venv\Scripts\activate.bat
-```
-
-### 3. Install Dependencies
-
 ```bash
-python -m pip install --upgrade pip
-pip install -r requirements.txt
+# macOS / Linux
+python3.12 -m venv .venv && source .venv/bin/activate
 ```
 
-For development and testing tools:
+**Install, configure, run**
 
 ```bash
 pip install -r requirements-dev.txt
-```
-
-### 4. Configure Environment Variables
-
-Create a local `.env` file using `.env.example` as the template.
-
-**PowerShell:**
-
-```powershell
-Copy-Item .env.example .env
-```
-
-Open `.env` and configure the required values, including a strong, unique `SECRET_KEY` and a suitable `DATABASE_URL`.
-
-Do not commit your `.env` file or share its secret values.
-
-See [Environment Configuration](#-environment-configuration) for details.
-
-### 5. Start the Application
-
-```bash
+cp .env.example .env          # Windows: Copy-Item .env.example .env
+# edit .env and set a strong SECRET_KEY (32+ characters)
 uvicorn app.main:app --reload
 ```
 
-Open the application in your browser:
+Open **http://127.0.0.1:8000** for the website and **http://127.0.0.1:8000/docs** for the interactive API docs.
 
-**Frontend:** http://127.0.0.1:8000
-
-**API documentation:** http://127.0.0.1:8000/docs
-
-The API documentation is available when the application exposes FastAPI's interactive documentation endpoints.
-
-To stop the development server, press `Ctrl + C`.
-
----
-
-## 🐳 Docker Setup
-
-SpendSmart includes a Dockerfile and Docker Compose configuration for containerized execution.
-
-### Prerequisites
-
-Install and start Docker Desktop, or install Docker Engine and the Docker Compose plugin.
-
-### Build the Image
+## 🐳 Docker
 
 ```bash
-docker compose build
+cp .env.example .env   # set SECRET_KEY
+docker compose up --build -d
 ```
 
-### Start the Application
+The app is served at http://localhost:8000 and data persists in a Docker volume. Stop it with `docker compose down`.
+
+## 🔐 Configuration
+
+| Variable | Required | Description |
+|---|---|---|
+| `SECRET_KEY` | ✅ | JWT signing secret, **at least 32 characters**, placeholder values are rejected |
+| `ALGORITHM` | | JWT algorithm (default `HS256`) |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | | Token lifetime (default `60`) |
+| `DATABASE_URL` | | SQLAlchemy URL (default `sqlite:///./data/spendsmart.db`) |
+| `LOGIN_MAX_ATTEMPTS` | | Failed logins allowed per email + IP before lock-out (default `5`) |
+| `LOGIN_WINDOW_SECONDS` | | Lock-out window (default `900`) |
+
+Generate a secret: `python -c "import secrets; print(secrets.token_urlsafe(48))"`
+
+**Never commit your `.env` file.**
+
+## 🎬 Demo Data
+
+Fill a local database with three months of realistic data (great for screenshots):
 
 ```bash
-docker compose up -d
+make seed            # or: python -m scripts.seed_demo
 ```
 
-### Check Container Status
-
-```bash
-docker compose ps
-```
-
-### View Application Logs
-
-```bash
-docker compose logs -f
-```
-
-### Open SpendSmart
-
-http://localhost:8000
-
-### Stop the Application
-
-```bash
-docker compose down
-```
-
-To stop the application without deleting its named database volume, use the command above.
-
-> **Important:** Removing named volumes deletes their stored data. Do not use `docker compose down -v` unless you intentionally want to remove the associated volumes.
-
----
-
-## 🔐 Environment Configuration
-
-SpendSmart uses environment variables for application configuration.
-
-The exact required variables are defined by the application's settings and `.env.example`.
-
-| Variable | Purpose |
-|---|---|
-| `SECRET_KEY` | Secret used for token-related security |
-| `ALGORITHM` | JWT signing algorithm |
-| `ACCESS_TOKEN_EXPIRE_MINUTES` | Access-token lifetime |
-| `DATABASE_URL` | Database connection string |
-
-Example configuration:
-
-```dotenv
-SECRET_KEY=replace_with_a_unique_random_secret
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=60
-DATABASE_URL=sqlite:///./data/spendsmart.db
-```
-
-This is an example, not a production secret. Generate a unique secret for each environment and verify the database path against the application's configuration.
-
-For local development, use `.env`.
-
-For deployment, configure environment variables through the hosting provider's environment settings.
-
-**Never commit real credentials, production secrets, or sensitive user data to GitHub.**
-
----
+Then log in with **demo@spendsmart.app** / **Demo@12345**.
 
 ## 🔌 API Overview
 
-SpendSmart exposes REST API endpoints for authentication, expense management, budget tracking, summaries, and CSV export.
-
-The following is a functional overview; consult the application's interactive API documentation for the exact route paths, HTTP methods, and request schemas.
-
-| Area | Purpose |
+| Area | Endpoints |
 |---|---|
-| Authentication | Register accounts and authenticate users |
-| Expenses | Create, retrieve, update, and delete expense records |
-| Dashboard / Summary | Retrieve spending summaries and transaction statistics |
-| Budget | Manage monthly budget information |
-| Export | Download transaction records in CSV format |
-| Health | Check whether the service is responding |
+| Auth | `POST /api/auth/register` · `POST /api/auth/login` · `GET/PUT /api/auth/me` · `PUT /api/auth/me/budget` · `POST /api/auth/me/password` · `DELETE /api/auth/me` |
+| Expenses | `GET/POST /api/expenses` · `GET/PUT/DELETE /api/expenses/{id}` · `GET /api/expenses/export/csv` · `POST /api/expenses/import/csv` |
+| Income | `GET/POST /api/income` · `PUT/DELETE /api/income/{id}` |
+| Category budgets | `GET /api/budgets` · `PUT/DELETE /api/budgets/{category}` |
+| Goals | `GET/POST /api/goals` · `PUT/DELETE /api/goals/{id}` · `POST /api/goals/{id}/contribute` |
+| Recurring | `GET/POST /api/recurring` · `PUT/DELETE /api/recurring/{id}` · `POST /api/recurring/process` |
+| Analytics | `GET /api/summary` · `GET /api/summary/trend` |
+| Health | `GET /api/health` |
 
-### Explore the API
+Full reference with examples: [`docs/API.md`](docs/API.md).
 
-When running locally, open:
-
-http://127.0.0.1:8000/docs
-
-The interactive Swagger UI allows you to inspect available endpoints, review schemas, and try API requests.
-
----
-
-## 🧪 Testing and Code Quality
-
-Automated tests help verify application behavior and reduce regressions.
-
-### Run the Test Suite
+## 🧪 Testing & Code Quality
 
 ```bash
-python -m pytest -q
+make test      # pytest with coverage
+make lint      # ruff check
 ```
 
-The project has **25 passing tests** in the recorded test run.
-
-Test results may change as the application evolves, so run the suite again after making code changes.
-
-### Run Ruff
-
-```bash
-ruff check .
-```
-
-Ruff checks Python code for supported linting issues.
-
-### Check Git Changes
-
-```bash
-git diff --check
-```
-
-This checks for common whitespace errors in the current Git diff.
-
-### Continuous Integration
-
-The repository includes a GitHub Actions workflow for automated checks.
-
-The configured CI pipeline has successfully completed the recorded test/lint and Docker image build jobs.
-
-Workflow results can be viewed in the repository's **Actions** tab.
-
----
+The suite covers authentication, rate limiting, account deletion, CRUD for every resource, validation, cross-user isolation, CSV import/export round-trips, budget status, goal pacing, recurring-bill generation (including idempotency and month-end handling) and analytics. Tests use an isolated in-memory database. GitHub Actions runs Ruff, Python compilation, JavaScript syntax checks, the test suite and a Docker build on every push and pull request.
 
 ## ☁️ Deployment
 
-SpendSmart is deployed on Render using a Docker-based web service.
+SpendSmart runs as a Docker web service on Render and honours the platform's `PORT` variable.
 
-### Deployment Configuration
+1. Push to GitHub and connect the repository to a Render **Docker** web service.
+2. Add the environment variables above (at minimum `SECRET_KEY`).
+3. Set the health-check path to `/api/health` and deploy.
 
-- **Source repository:** GitHub
-- **Application:** FastAPI
-- **Runtime:** Docker
-- **Hosting platform:** Render
-- **Server:** Uvicorn
-- **Port:** Configured to support the hosting platform's `PORT` environment variable
+**Live:** https://spendsmart-794k.onrender.com
 
-### Deployment Checklist
+> Free hosting may sleep after inactivity, and SQLite data on an ephemeral filesystem can be lost on redeploy. For durable data use a persistent disk or a managed database.
 
-1. Push the latest application code to GitHub.
-2. Create or open the Render web service connected to the repository.
-3. Configure the Docker runtime.
-4. Add the required environment variables in Render.
-5. Set the health-check path to `/api/health` if that endpoint is implemented and returns a successful response.
-6. Deploy the latest commit.
-7. Check the deployment logs and open the live application.
+## 🔒 Security
 
-### Live URL
+- Passwords hashed with **bcrypt** (72-byte limit enforced, never returned by the API)
+- **JWT** access tokens with expiry; secret validated at start-up
+- **Rate-limited login** with `429` + `Retry-After`
+- Every query is **scoped to the owner**; other users' records return `404`
+- Strict **Pydantic validation** (types, ranges, enums, blank-string checks)
+- **Content-Security-Policy**, `X-Frame-Options`, `nosniff` and `Referrer-Policy` headers
+- UI renders data with `textContent` (no `innerHTML`) to prevent **XSS**
+- **CSV formula-injection** protection on export, reversed safely on import
+- Docker image runs as a **non-root** user
 
-https://spendsmart-794k.onrender.com
+*SpendSmart is a portfolio project, not a certified financial or banking system.*
 
-### Hosting Considerations
+## 🗺️ Roadmap
 
-Free hosting services may suspend inactive services, resulting in a delay when the next request arrives.
-
-Local SQLite data stored on an ephemeral hosting filesystem can be lost during a restart, redeployment, or instance replacement. For reliable long-term persistence, use a supported persistent disk or a managed database and configure the application accordingly.
-
----
+- [ ] Alembic migrations and PostgreSQL in `docker-compose`
+- [ ] Refresh tokens and password reset by email
+- [ ] Shared / household budgets
+- [ ] Receipt attachments
+- [ ] Installable PWA with offline support
 
 ## 📚 Documentation
 
-Additional project documentation is available in the `docs/` directory.
-
-| Document | Description |
-|---|---|
-| [`API.md`](docs/API.md) | API reference and endpoint documentation |
-| [`ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Application structure and architecture |
-| [`QUALITY_REVIEW.md`](docs/QUALITY_REVIEW.md) | Project quality review and technical observations |
-
----
-
-## 🔒 Security Considerations
-
-The application incorporates security-related practices, including:
-
-- Password hashing with bcrypt.
-- JWT-based authentication.
-- Validation of application settings.
-- Environment-based configuration.
-- Exclusion of local secrets through `.gitignore`.
-- Automated testing of application behavior.
-
-For a production financial application, additional review is recommended for rate limiting, authentication abuse prevention, secret rotation, database backups, HTTPS configuration, dependency updates, and handling of sensitive user information.
-
-**SpendSmart is a portfolio project and should not be treated as a certified financial or banking system.**
-
----
-
-## 🗺️ Future Improvements
-
-Potential enhancements for future iterations include:
-
-- 📈 Monthly and yearly spending trends.
-- 🎯 Category-specific budgets and budget alerts.
-- 📊 More advanced financial visualizations.
-- 🔁 Recurring expense support.
-- 📱 Improved mobile responsiveness.
-- 📤 Additional export formats.
-- 🗄️ Production-grade persistent database configuration.
-- 🚦 Expanded integration tests and test coverage reporting.
-- 🔐 Additional authentication and API abuse protections.
-
-These are potential improvements, not claims about currently implemented functionality.
-
----
+- [API reference](docs/API.md)
+- [Architecture & design decisions](docs/ARCHITECTURE.md)
+- [Quality review](docs/QUALITY_REVIEW.md)
+- [Contributing](CONTRIBUTING.md)
 
 ## 👨‍💻 Author
 

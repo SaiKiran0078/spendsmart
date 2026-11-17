@@ -1,4 +1,4 @@
-.PHONY: install run test lint format
+.PHONY: install run test lint format seed
 
 install:
 	pip install -r requirements-dev.txt
@@ -14,3 +14,6 @@ lint:
 
 format:
 	ruff format .
+
+seed:
+	python -m scripts.seed_demo
