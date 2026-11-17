@@ -1,20 +1,13 @@
 from datetime import date
 
-from fastapi import APIRouter, Query
-from sqlalchemy import func, select
+from fastapi import APIRouter, HTTPException, Query
 
 from app.deps import CurrentUser, DbSession
-from app.models import Expense
-from app.schemas import CategoryTotal, MonthlySummary
+from app.schemas import MonthlySummary, TrendPoint
+from app.services.analytics import build_summary, build_trend
+from app.services.recurring import process_due
 
 router = APIRouter()
-
-
-def month_range(year: int, month: int) -> tuple[date, date]:
-    """Return (first day of month, first day of next month)."""
-    start = date(year, month, 1)
-    end = date(year + (month == 12), (month % 12) + 1, 1)
-    return start, end
 
 
 @router.get("", response_model=MonthlySummary)
@@ -24,36 +17,30 @@ def monthly_summary(
     year: int | None = Query(default=None, ge=2000, le=2100),
     month: int | None = Query(default=None, ge=1, le=12),
 ):
+    """Totals, comparisons, daily spending, top expenses and plain-English insights."""
+    if (year is None) != (month is None):
+        raise HTTPException(
+            status_code=422,
+            detail="year and month must be supplied together",
+        )
     today = date.today()
-    year = year or today.year
-    month = month or today.month
-    start, end = month_range(year, month)
+    process_due(db, current_user.id)  # make sure due recurring bills are counted
+    return build_summary(db, current_user, year or today.year, month or today.month)
 
-    in_month = (
-        Expense.owner_id == current_user.id,
-        Expense.spent_on >= start,
-        Expense.spent_on < end,
-    )
-    rows = db.execute(
-        select(Expense.category, func.sum(Expense.amount))
-        .where(*in_month)
-        .group_by(Expense.category)
-        .order_by(func.sum(Expense.amount).desc())
-    ).all()
-    count = db.scalar(select(func.count(Expense.id)).where(*in_month)) or 0
 
-    by_category = [CategoryTotal(category=c, total=round(t, 2)) for c, t in rows]
-    total = round(sum(item.total for item in by_category), 2)
-    budget = current_user.monthly_budget
-    used = round(total / budget * 100, 1) if budget > 0 else 0.0
-
-    return MonthlySummary(
-        year=year,
-        month=month,
-        total_spent=total,
-        expense_count=count,
-        monthly_budget=budget,
-        remaining=round(budget - total, 2),
-        budget_used_percent=used,
-        by_category=by_category,
-    )
+@router.get("/trend", response_model=list[TrendPoint])
+def trend(
+    db: DbSession,
+    current_user: CurrentUser,
+    months: int = Query(default=6, ge=2, le=12),
+    year: int | None = Query(default=None, ge=2000, le=2100),
+    month: int | None = Query(default=None, ge=1, le=12),
+):
+    """Income vs. expenses for the last N months, ending at the chosen month."""
+    if (year is None) != (month is None):
+        raise HTTPException(
+            status_code=422,
+            detail="year and month must be supplied together",
+        )
+    today = date.today()
+    return build_trend(db, current_user.id, year or today.year, month or today.month, months)

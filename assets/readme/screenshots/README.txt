@@ -1,0 +1,1 @@
+SpendSmart README screenshots. Captures are genuine screenshots of the application UI.\n

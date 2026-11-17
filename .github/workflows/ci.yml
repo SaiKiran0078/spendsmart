@@ -1,4 +1,4 @@
-﻿name: CI
+name: CI
 
 on:
   push:
@@ -30,6 +30,22 @@ jobs:
 
       - name: Lint with Ruff
         run: ruff check .
+
+      - name: Check JavaScript syntax
+        run: |
+          for f in $(find frontend/js -name "*.js"); do
+            cp "$f" /tmp/check.mjs && node --check /tmp/check.mjs
+          done
+
+      - name: Check JavaScript syntax
+        run: |
+          for file in $(find frontend/js -name "*.js" -type f); do
+            cp "$file" /tmp/spendsmart-check.mjs
+            node --check /tmp/spendsmart-check.mjs
+          done
+
+      - name: Compile Python sources
+        run: python -m compileall -q app tests scripts
 
       - name: Run tests with coverage
         run: pytest --cov=app --cov-report=term-missing

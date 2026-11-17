@@ -94,7 +94,10 @@ def test_monthly_summary(client, auth_headers):
 
 
 def test_health_endpoint(client):
-    assert client.get("/api/health").json() == {"status": "ok"}
+    response = client.get("/api/health")
+
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok", "database": "ok"}
 
 
 
@@ -111,7 +114,20 @@ def test_rejects_inverted_date_range(client, auth_headers):
 
 
 def test_csv_guard_handles_leading_whitespace(client, auth_headers):
-    make_expense(client, auth_headers, title="   =1+1")
+    created = make_expense(client, auth_headers, title="   =1+1")
+    assert created.status_code == 201
+    assert created.json()["title"] == "   =1+1"
+
     res = client.get("/api/expenses/export/csv", headers=auth_headers)
     assert res.status_code == 200
     assert "'   =1+1" in res.text
+
+
+def test_non_finite_amounts_are_rejected(client, auth_headers):
+    for amount in ("NaN", "Infinity", "-Infinity"):
+        response = client.post(
+            "/api/expenses",
+            json={"title": "Invalid", "amount": amount, "category": "Food"},
+            headers=auth_headers,
+        )
+        assert response.status_code == 422
